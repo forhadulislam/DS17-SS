@@ -3,11 +3,23 @@
 const portscanner = require("portscanner");
 const WebSocket = require("ws");
 let wss;
+let wssArr = [];
 const ports = [8080, 8081, 8082];
 
 const crypto = require("crypto");
 const algorithm = "aes-256-ctr"; // Encryption algorithm
-const password = "dsIsAwesome9001"; // Encryption key
+const password = "ssquad2017"; // Encryption key
+
+const wordsList = [
+					'OULU',
+					'HELSINKI',
+					'TAMPERE',
+					'JYVASKULA',
+					'TURKU',
+					'ESPOO',
+					'JOENSUU',
+					'KUOPIO'
+					];
 
 class State {
     constructor(deck, maxPlayers) {
@@ -117,7 +129,7 @@ class State {
 
 }
 
-// SATE OBJECT
+// STATE OBJECT
 const state = new State(null, 3);
 
 // UTILS
@@ -127,6 +139,7 @@ const createDeck = numOfCards => {
 
 const shuffleDeck = deck => {
     let a = deck;
+	// Math.random() * (max - min) + min;
     for (let i = a.length; i; i--) {
         let j = Math.floor(Math.random() * i);
         [a[i - 1], a[j]] = [a[j], a[i - 1]];
@@ -145,8 +158,12 @@ const isCorrect = msg => {
     // Checks if the answer is correct
 
     msg = msg.toUpperCase();
-
-    switch (msg) {
+	
+	if( wordsList.indexOf( msg ) >= 0 ){
+		return true;
+	}
+	
+    /*switch (msg) {
         case "BIGGER":
             if (state.nextCard > state.lastCard) {
                 return true;
@@ -160,9 +177,10 @@ const isCorrect = msg => {
             break;
 
         default:
-            throw "Invalid message!";
+            //throw "Invalid message!";
+            throw msg;
             break;
-    }
+    }*/
     return false;
 };
 
@@ -170,7 +188,8 @@ const constructMessage = (message, players, card) => {
     var msg = {
         "message": message,
         "players": players,
-        "card": card
+        "card": wordsList[card]
+        //"card": card
     };
 
     return encrypt(JSON.stringify(msg));
@@ -201,6 +220,7 @@ const handleTurns = () => {
     giveTurn(state.cons[state.turn], state.card);
 }
 
+// Handles the ending of the game and choose client
 const handleGameEnd = () => {
 
     if (state.cons.length === 1) { // Just one connection
@@ -222,14 +242,16 @@ const handleGameEnd = () => {
     broadCast("GAME OVER", state.players, null);
     state.cons[winner].send(constructMessage("YOU WIN", state.players, null));
     losers.forEach(l => state.cons[l].send(constructMessage("YOU LOST", state.players, null)));
-
+	
+	console.log(state.players);
     // Reset everything to enable new game
     state.reset();
 };
 
 const onConnection = ws => {
 
-    if (state.turn >= 0) { // GAME ALREADY ON
+    if (state.turn >= 0) { 
+		// GAME ALREADY ON
         ws.send(constructMessage("GAME FULL", null));
         ws.close();
         return;
@@ -238,11 +260,13 @@ const onConnection = ws => {
     if (state.cons.length < state.maxPlayers - 1) {
         handleConnection(ws);
 
-    } else if (state.cons.length === state.maxPlayers - 1) { // Last player
+    } else if (state.cons.length === state.maxPlayers - 1) { 
+		// Last player
         handleConnection(ws);
 
         // START THE GAME;
-        state.deck = shuffleDeck(createDeck(6));
+        //state.deck = shuffleDeck(createDeck(6));
+        state.deck = shuffleDeck(createDeck(wordsList.length));
         handleTurns();
 
     } else {
@@ -252,6 +276,7 @@ const onConnection = ws => {
     }
 };
 
+// Fault tolerance
 const onClose = function(message) {
     // this needs to be binded to the socket that was closed
 
@@ -333,4 +358,5 @@ portscanner.findAPortNotInUse(ports[0], ports[2], "127.0.0.1", (err, port) => {
     wss = new WebSocket.Server({ port: port });
     wss.on("connection", onConnection);
     console.log(`Listening to port ${port}`);
+	
 });

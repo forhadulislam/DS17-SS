@@ -1,4 +1,4 @@
-# Distributed systems 2017 - Project work for University of Oulu
+# Distributed Systems 2017 - Project work for University of Oulu
 ### By Suicide Squad:
 `Ahsan Manzoor			2474029`
 `Ashikur Rahman			2510093`
@@ -21,8 +21,7 @@ When Node.js is installed move to the server folder and run the next command on 
 `npm install` command will install all the dependencies which are needed for the server to run.
 
 ### 3) Running the server
-`node server`
-The command `node server` will run the server after all above steps have been done. You have to be in the server folder to do this.
+`node server` command will run the server after all above steps have been done. You have to be in the server folder to do this.
 
 
 ## Running the client

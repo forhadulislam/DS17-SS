@@ -1,4 +1,12 @@
-
+@import url('https://fonts.googleapis.com/css?family=Antic+Slab|Armata|Glegoo|Indie+Flower|Nixie+One|Pacifico');
+body{
+	font-size: 16px;
+	font-family: 'Indie Flower', cursive;
+	font-family: 'Pacifico', cursive;
+	font-family: 'Armata', sans-serif;
+	font-family: 'Antic Slab', serif;
+	font-family: 'Glegoo', serif;
+}
 .game,
 .waiting {
     display: none;
@@ -9,4 +17,46 @@
 
 .js-hide {
     display: none;
+}
+
+.main{
+	background: #f6f6f6;
+	width: 30%;
+	margin: 3em auto;
+	padding: 2em;
+	border: 1px solid #d2d2d2;
+	border-top: 3px solid #000;
+}
+.main h1{
+	font-family: 'Nixie One', cursive;
+	text-align: center;
+	position: relative;
+}
+.main h1:after{
+	content: " ";
+	width: 40px;
+	height: 2px;
+	background: #D24D57;
+	position: absolute;
+	top: 105%;
+	left: 45%;
+}
+.game input{
+	
+}
+button#ready{
+	padding: 0.8em;
+	background: #9B59B6;
+	font-family: 'Pacifico', cursive;
+	border: none;
+	min-width: 8em;
+	color: #fff;
+}
+.game button.control{
+	padding: 0.8em;
+	background: #336E7B;
+	font-family: 'Pacifico', cursive;
+	border: none;
+	min-width: 8em;
+	color: #fff;
 }

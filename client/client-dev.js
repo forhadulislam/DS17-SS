@@ -16,7 +16,7 @@ const controls = [...document.getElementsByClassName("control")];
 
 // ENCRYPTION CONSTANTS
 const algorithm = "aes-256-ctr";
-const password = "dsIsAwesome9001";
+const password = "ssquad2017";
 
 // SOCKETS
 let ws;
@@ -49,8 +49,7 @@ const onMessage = function(event) {
             break;
 
         case "RIGHT":
-            info.innerHTML = `Congratulations! You guessed right!<br>
-                                The card was ${data.card}`;
+            info.innerHTML = `Congratulations! You guessed right!<br> The card was ${data.card}`;
             break;
 
         case "SCORE":

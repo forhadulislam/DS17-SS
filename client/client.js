@@ -21956,8 +21956,8 @@ const crypto = __webpack_require__(62);
 const menu = document.getElementById("menu");
 const ready = document.getElementById("ready");
 const game = document.getElementById("game");
-const bigger = document.getElementById("bigger");
-const smaller = document.getElementById("smaller");
+const word = document.getElementById("word");
+const sbutton = document.getElementById("sbutton");
 const waiting = document.getElementById("waiting");
 const info = document.getElementById("info");
 const players = document.getElementById("players");
@@ -21966,11 +21966,13 @@ const controls = [...document.getElementsByClassName("control")];
 
 // ENCRYPTION CONSTANTS
 const algorithm = "aes-256-ctr";
-const password = "dsIsAwesome9001";
+const password = "ssquad2017";
 
 // SOCKETS
 let ws;
+let ws2;
 const maxPort = 8089;
+let ports = [8080, 8081];
 
 // SOCKET EVENTS
 const onConnection = function(event) {
@@ -21982,25 +21984,22 @@ const onMessage = function(event) {
     const data = JSON.parse(decrypt(event.data));
 
     console.log(data);
+    console.log("City :" + data.card);
 
     switch(data.message.toUpperCase()) {
         case "YOUR TURN":
-            info.innerHTML = `It's your turn to guess!<br>
-                                Is the next card smaller or bigger than
-                                ${data.card}`;
+            info.innerHTML = `It's your turn to guess!<br> Guess the city ${data.card}`;
             enableControls();
             waiting.classList.add("js-hide");
             game.classList.add("js-show");
             break;
 
         case "WRONG":
-            info.innerHTML = `Sorry. You guessed wrong :(<br>
-                                The card was ${data.card}`;
+            info.innerHTML = `Sorry. You guessed wrong :( <br> The city was ${data.card}`;
             break;
 
         case "RIGHT":
-            info.innerHTML = `Congratulations! You guessed right!<br>
-                                The card was ${data.card}`;
+            info.innerHTML = `Congratulations! You guessed right! <br> The city was ${data.card}`;
             break;
 
         case "SCORE":
@@ -22048,10 +22047,29 @@ const onMessage = function(event) {
 
 // DOM EVENTS
 ready.addEventListener("click", () => {
-    let port = 8081;
-    ws = new WebSocket("ws://localhost:" + port);
-    ws.onopen = onConnection;
-    ws.onmessage = onMessage;
+    
+	try {
+		    
+		ws = new WebSocket("ws://localhost:" + ports[0]);    
+		ws.onopen = onConnection;
+		ws.onmessage = onMessage;
+	}
+	catch(err) {
+		console.log("Cannot connect to Server 1");
+	}
+	
+	try {
+		
+		ws2 = new WebSocket("ws://localhost:" + ports[1]);
+		ws2.onopen = onConnection;
+		ws2.onmessage = onMessage;
+	}
+	catch(err) {
+		console.log("Cannot connect to Server 2");
+	}
+	
+	
+	
 
     // ws.onclose = function(event) {
     //     if (event.code === 3001) {
@@ -22073,7 +22091,23 @@ ready.addEventListener("click", () => {
 controls.forEach(control => control.addEventListener("click", controlClick))
 
 function controlClick() {
-    ws.send(encrypt(this.dataset.msg.toUpperCase()));
+	var currentWord = word.value;
+    //ws.send(encrypt(this.dataset.msg.toUpperCase()));
+    
+    
+	try {
+		ws.send(encrypt(currentWord));
+	}
+	catch(err) {
+		console.log("Server 1 down");
+	}
+	
+	try {
+		ws2.send(encrypt(currentWord));
+	}
+	catch(err) {
+		console.log("Server 2 down");
+	}
     disableControls();
 }
 
