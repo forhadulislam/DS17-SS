@@ -338,8 +338,8 @@ const onConnection = ws => {
         handleConnection(ws);
 
         // START THE GAME;
-        //state.deck = shuffleDeck(createDeck(6));
-        state.deck = shuffleDeck(createDeck(wordsList.length-1));
+        state.deck = shuffleDeck(createDeck(6));
+        //state.deck = shuffleDeck(createDeck(wordsList.length-1));
         handleTurns();
 
     } else {

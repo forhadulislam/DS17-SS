@@ -21987,14 +21987,16 @@ const onMessage = function(event) {
 
     switch(data.message.toUpperCase()) {
         case "YOUR TURN":
-			var city;
+			var cityF,cityL;
 			try{
-				city = data.card[0]
+				cityF = data.card[0]
+				cityL = data.card[data.card.length - 1]
 			}catch(err) {
-				city = " "
+				cityF = " "
+				cityL = " "
 			}
 			
-            info.innerHTML = `It's your turn to guess!<br> Guess the city name which starts with : " ${city} "`;
+            info.innerHTML = `It's your turn to guess!<br> Guess the city name which starts with : " ${cityF} " and ends with  " ${cityL} "`;
             enableControls();
             waiting.classList.add("js-hide");
             game.classList.add("js-show");
