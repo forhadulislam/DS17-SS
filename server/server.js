@@ -2,9 +2,10 @@
 
 const portscanner = require("portscanner");
 const WebSocket = require("ws");
-let wss;
+let wss, currentWord;
+let currentCount = -1;
 let wssArr = [];
-const ports = [8080, 8081, 8082];
+const ports = [8080,8090];
 
 const crypto = require("crypto");
 const algorithm = "aes-256-ctr"; // Encryption algorithm
@@ -18,7 +19,18 @@ const wordsList = [
 					'TURKU',
 					'ESPOO',
 					'JOENSUU',
-					'KUOPIO'
+					'KUOPIO',
+					'TORNIO',
+					'SOMERO',
+					'KEMI',
+					'PORVOO',
+					'PORI',
+					'SALO',
+					'RAAHE',
+					'LAHTI',
+					'KUHMO',
+					'LAUPA',
+					'NURMES'
 					];
 
 class State {
@@ -29,6 +41,7 @@ class State {
         this._maxPlayers = maxPlayers || null;
         this._lastCard = null;
         this._players = [];
+        this._currentTurn = 0;
     }
 
     // GETTERS
@@ -56,6 +69,10 @@ class State {
     get nextCard() {
         return this._deck[this._deck.length - 1];
     }
+	
+    get currentTurn() {
+        return this._currentTurn;
+    }
 
     get lastCard() {
         return this._lastCard;
@@ -68,6 +85,7 @@ class State {
             "turn": this.turn,
             "maxPlayers:": this.maxPlayers,
             "lastCard": this.lastCard,
+            "currentTurn": this.currentTurn,
         };
     }
 
@@ -86,6 +104,10 @@ class State {
 
     set turn(turn) {
         this._turn = turn;
+    }
+	
+	set currentTurn(currentTurn) {
+        this._currentTurn = currentTurn;
     }
 
     set players(players) {
@@ -148,8 +170,20 @@ const shuffleDeck = deck => {
 };
 
 const giveTurn = (player, card) => {
-    player.send(
-        constructMessage("YOUR TURN", state.players, card)
+	
+	// New
+	//currentCount++;
+	//currentWord = wordsList[card];
+	//currentWord = wordsList[currentCount];
+	currentCount++;
+	currentWord = wordsList[currentCount];
+	console.log("currentWord");
+	console.log(currentWord);
+	console.log(currentCount);
+	
+    player.send(		
+        //constructMessage("YOUR TURN", state.players, card)
+        constructMessage("YOUR TURN", state.players, currentWord)
     );
 };
 
@@ -158,8 +192,16 @@ const isCorrect = msg => {
     // Checks if the answer is correct
 
     msg = msg.toUpperCase();
+	//var currentWord = wordsList[state.nextCard];
 	
-	if( wordsList.indexOf( msg ) >= 0 ){
+	/*console.log(wordsList[state.nextCard]);
+	console.log(wordsList[state.nextCard-1]);
+	console.log(wordsList[state.lastCard]);
+	console.log(wordsList[state.lastCard - 1]);*/
+	console.log("msg");
+	console.log(msg);
+	
+	if( msg == currentWord ){	
 		return true;
 	}
 	
@@ -185,10 +227,13 @@ const isCorrect = msg => {
 };
 
 const constructMessage = (message, players, card) => {
+	//currentCount++;
+	//currentWord = wordsList[currentCount];
     var msg = {
         "message": message,
         "players": players,
-        "card": wordsList[card]
+        "card": currentWord
+        //"card": wordsList[card]
         //"card": card
     };
 
@@ -229,13 +274,37 @@ const handleGameEnd = () => {
     }
 
     // Get the player with highest score
-    const winner = state.players.reduce((a, b) => {
+    /*const winner = state.players.reduce((a, b) => {
         if (a.score > b.score) {
             return state.players.indexOf(a);
         }
         return state.players.indexOf(b);
     });
-
+	const winner = function(){
+		var players = state.players;
+		var scores = [];
+		for (var key in players) {
+		  if (players.hasOwnProperty(score)) {
+			console.log(key + " -> " + players[score]);
+			scores.push( players[score] );
+		  }
+		}
+		return scores[0]
+	}
+	*/
+	const max = state.players.reduce(function(prev, current) {
+		return (prev.score > current.score) ? prev : current
+	})
+	var winner;
+	for(var i=0; i<state.players.length;i++){
+		if( state.players[i] == max){
+		winner = i;
+	  }
+	}
+	
+	console.log("winner");
+	console.log(winner);
+	
     // Other players than the winner
     const losers = [...Array(state.players.length).keys()].filter(a => a !== winner);
 
@@ -244,13 +313,17 @@ const handleGameEnd = () => {
     losers.forEach(l => state.cons[l].send(constructMessage("YOU LOST", state.players, null)));
 	
 	console.log(state.players);
-    // Reset everything to enable new game
+	
+    /* 
+		Reset all 	
+	*/
+	
     state.reset();
 };
 
 const onConnection = ws => {
 
-    if (state.turn >= 0) { 
+    if (state.turn >= 0) {
 		// GAME ALREADY ON
         ws.send(constructMessage("GAME FULL", null));
         ws.close();
@@ -266,7 +339,7 @@ const onConnection = ws => {
 
         // START THE GAME;
         //state.deck = shuffleDeck(createDeck(6));
-        state.deck = shuffleDeck(createDeck(wordsList.length));
+        state.deck = shuffleDeck(createDeck(wordsList.length-1));
         handleTurns();
 
     } else {
@@ -278,10 +351,8 @@ const onConnection = ws => {
 
 // Fault tolerance
 const onClose = function(message) {
-    // this needs to be binded to the socket that was closed
 
-    // Handles closed connections
-
+    // Handles the closed connections if there is any
     let index = state.cons.indexOf(this);
 
 
@@ -298,7 +369,9 @@ const onClose = function(message) {
 
 
     console.log(`node ${index} disconnected`);
-    if(!state.cons.length) { // All connections have disconnected
+	
+	// If all of the connections are disconnected
+    if(!state.cons.length) {		
         state.reset();
         return;
     }
@@ -354,7 +427,7 @@ const decrypt = (text) => {
 };
 
 // CONNECT
-portscanner.findAPortNotInUse(ports[0], ports[2], "127.0.0.1", (err, port) => {
+portscanner.findAPortNotInUse(ports[0], ports[1], "127.0.0.1", (err, port) => {
     wss = new WebSocket.Server({ port: port });
     wss.on("connection", onConnection);
     console.log(`Listening to port ${port}`);

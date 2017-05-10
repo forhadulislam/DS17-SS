@@ -21969,8 +21969,7 @@ const algorithm = "aes-256-ctr";
 const password = "ssquad2017";
 
 // SOCKETS
-let ws;
-let ws2;
+let ws,ws2;
 const maxPort = 8089;
 let ports = [8080, 8081];
 
@@ -21988,7 +21987,14 @@ const onMessage = function(event) {
 
     switch(data.message.toUpperCase()) {
         case "YOUR TURN":
-            info.innerHTML = `It's your turn to guess!<br> Guess the city ${data.card}`;
+			var city;
+			try{
+				city = data.card[0]
+			}catch(err) {
+				city = " "
+			}
+			
+            info.innerHTML = `It's your turn to guess!<br> Guess the city name which starts with : " ${city} "`;
             enableControls();
             waiting.classList.add("js-hide");
             game.classList.add("js-show");
@@ -22050,40 +22056,22 @@ ready.addEventListener("click", () => {
     
 	try {
 		    
-		ws = new WebSocket("ws://localhost:" + ports[0]);    
+		ws = new WebSocket("ws://localhost:" + ports[0]);		
 		ws.onopen = onConnection;
 		ws.onmessage = onMessage;
 	}
 	catch(err) {
-		console.log("Cannot connect to Server 1");
+		console.log("Cannot connect to Server 1");	
 	}
 	
-	try {
-		
+	try {		
 		ws2 = new WebSocket("ws://localhost:" + ports[1]);
 		ws2.onopen = onConnection;
 		ws2.onmessage = onMessage;
-	}
-	catch(err) {
+	}catch(err) {
 		console.log("Cannot connect to Server 2");
 	}
 	
-	
-	
-
-    // ws.onclose = function(event) {
-    //     if (event.code === 3001) {
-    //         console.log("Connection closed");
-    //         ws = null;
-    //         return;
-    //     }
-    //     port++;
-    //     if (port > maxPort) {
-    //         console.log("Now available servers at this time.");
-    //         ws = null;
-    //     }
-    //     ws = new WebSocket("ws://localhost" + port);
-    // };
     menu.classList.add("js-hide");
     waiting.classList.add("js-show");
 });
@@ -22096,18 +22084,26 @@ function controlClick() {
     
     
 	try {
-		ws.send(encrypt(currentWord));
-	}
-	catch(err) {
-		console.log("Server 1 down");
+		if( ws.readyState > 1){
+			console.log("Server 1 down");
+		}else{
+			ws.send(encrypt(currentWord));
+		}
+	}catch(err) {
+		console.error("Server 1 down");		
 	}
 	
 	try {
-		ws2.send(encrypt(currentWord));
+		if( ws2.readyState > 1){
+			console.log("Server 2 down");
+		}else{
+			ws2.send(encrypt(currentWord));
+		}	
+	}catch(err) {
+		console.error("Server 2 down");
 	}
-	catch(err) {
-		console.log("Server 2 down");
-	}
+	
+	
     disableControls();
 }
 
