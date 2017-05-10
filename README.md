@@ -7,9 +7,9 @@
 
 ## Description
 
-Our project is implements a simple distributed system for the course "Distributed System" in the University of Oulu. The system implements a simplified version of Hangman game where the players try to guess a word which is defined by the system and the users get 1 point for each successful prediction.
+Our project is implements a simple distributed system for the course "Distributed System" in the University of Oulu. The system implements a simplified version of Hangman game where the players try to guess city names which is defined by the system and the users get 1 point for each successful prediction. 1 point is deducted if the prediction is wrong. 
 
-## Server installation
+## Server setup
 ### 1) Node.js
 The server requires Node.js to work. So if you don't already have Node.js installed on your computer you have to install it first.
 Download this from here: <a href="https://nodejs.org/en/download/">Link for downloading Node.js</a>
