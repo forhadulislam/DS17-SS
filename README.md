@@ -13,7 +13,7 @@ Our project is implements a simple distributed system for the course "Distribute
 	* Fault tolerance and recovery
 	* Consistency and Replication:
 	* Naming
-	* Security​:
+	* Security​
 	* Synchronization
 	* Communication
 
