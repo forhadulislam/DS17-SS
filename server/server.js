@@ -5,11 +5,17 @@ const WebSocket = require("ws");
 let wss, currentWord;
 let currentCount = -1;
 let wssArr = [];
+
+// Ports the server will try to connect using the number ports within this range
 const ports = [8080,8090];
 
 const crypto = require("crypto");
-const algorithm = "aes-256-ctr"; // Encryption algorithm
-const password = "ssquad2017"; // Encryption key
+
+// AES 265 bit encryption algorithm
+const algorithm = "aes-256-ctr"; 
+
+// The kye for Encryption
+const password = "ssquad2017"; 
 
 const wordsList = [
 					'OULU',
@@ -194,10 +200,6 @@ const isCorrect = msg => {
     msg = msg.toUpperCase();
 	//var currentWord = wordsList[state.nextCard];
 	
-	/*console.log(wordsList[state.nextCard]);
-	console.log(wordsList[state.nextCard-1]);
-	console.log(wordsList[state.lastCard]);
-	console.log(wordsList[state.lastCard - 1]);*/
 	console.log("msg");
 	console.log(msg);
 	
@@ -205,24 +207,6 @@ const isCorrect = msg => {
 		return true;
 	}
 	
-    /*switch (msg) {
-        case "BIGGER":
-            if (state.nextCard > state.lastCard) {
-                return true;
-            }
-            break;
-
-        case "SMALLER":
-            if (state.nextCard < state.lastCard) {
-                return true;
-            }
-            break;
-
-        default:
-            //throw "Invalid message!";
-            throw msg;
-            break;
-    }*/
     return false;
 };
 
@@ -273,25 +257,8 @@ const handleGameEnd = () => {
         return;
     }
 
-    // Get the player with highest score
-    /*const winner = state.players.reduce((a, b) => {
-        if (a.score > b.score) {
-            return state.players.indexOf(a);
-        }
-        return state.players.indexOf(b);
-    });
-	const winner = function(){
-		var players = state.players;
-		var scores = [];
-		for (var key in players) {
-		  if (players.hasOwnProperty(score)) {
-			console.log(key + " -> " + players[score]);
-			scores.push( players[score] );
-		  }
-		}
-		return scores[0]
-	}
-	*/
+    // Find the player with highest score
+   
 	const max = state.players.reduce(function(prev, current) {
 		return (prev.score > current.score) ? prev : current
 	})
@@ -305,7 +272,7 @@ const handleGameEnd = () => {
 	console.log("winner");
 	console.log(winner);
 	
-    // Other players than the winner
+    // Find the losers 
     const losers = [...Array(state.players.length).keys()].filter(a => a !== winner);
 
     broadCast("GAME OVER", state.players, null);
@@ -409,7 +376,7 @@ const onMessage = function(message) {
 };
 
 
-// ENCRYPTION UTILS
+// ENCRYPTION FUNCTIONALITIES
 const encrypt = (text) => {
     // Encrypt text using crypto module
     const cipher = crypto.createCipher(algorithm, password);
@@ -426,7 +393,7 @@ const decrypt = (text) => {
     return dec;
 };
 
-// CONNECT
+// RUN THE CONNECT
 portscanner.findAPortNotInUse(ports[0], ports[1], "127.0.0.1", (err, port) => {
     wss = new WebSocket.Server({ port: port });
     wss.on("connection", onConnection);
